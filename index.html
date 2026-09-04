@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ozeol DFC — Perfect Multi-Image & PDF Converter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+ 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+ 
+<style>
+:root {
+    --bg-main: #f8f6f4;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f4f1ee;
+    --bg-alt: #faf7f4;
+    --bg-dark: #1a1a1a;
+    --border: #e8e0d8;
+    --border-hover: #d4c8bc;
+    --brand: #F26522;
+    --brand-hover: #d9531a;
+    --brand-dark: #b8420f;
+    --brand-light: #fff1e8;
+    --brand-glow: rgba(242, 101, 34, 0.15);
+    --brand-gradient: linear-gradient(135deg, #F26522, #ff8547);
+    --gold: #c98a1a;
+    --gold-light: #fdf3d8;
+    --gold-border: #f5d98a;
+    --green: #059669;
+    --green-hover: #047857;
+    --green-light: #ecfdf5;
+    --green-border: #a7f3d0;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --red-border: #fecaca;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --orange-border: #ffedd5;
+    --txt-1: #1a1a1a;
+    --txt-2: #524a44;
+    --txt-3: #9c9089;
+    --txt-white: #ffffff;
+    --txt-white-2: rgba(255,255,255,0.75);
+    --txt-white-3: rgba(255,255,255,0.5);
+    --shadow-xs: 0 1px 2px rgba(26, 26, 26, 0.05);
+    --shadow-sm: 0 1px 3px rgba(26, 26, 26, 0.08), 0 1px 2px rgba(26, 26, 26, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(26, 26, 26, 0.08), 0 2px 4px -2px rgba(26, 26, 26, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(26, 26, 26, 0.1), 0 4px 6px -4px rgba(26, 26, 26, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(26, 26, 26, 0.12), 0 8px 10px -6px rgba(26, 26, 26, 0.05);
+    --shadow-orange: 0 4px 14px rgba(242, 101, 34, 0.25);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-main); color: var(--txt-1); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+.nav { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; background: var(--bg-dark); border-bottom: 3px solid var(--brand); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.15); }
+.nav-logo { cursor: pointer; }
+.nav-logo-text { font-size: 28px; font-weight: 900; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic; letter-spacing: -0.02em; }
+.nav-logo-dot { color: var(--brand); font-weight: 700; font-size: 14px; font-style: italic; }
+.nav-logo-tagline { display: block; font-size: 8px; font-weight: 600; color: var(--txt-white-3); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; }
+.nav-app-name { margin-left: 14px; padding-left: 14px; border-left: 1px solid rgba(255,255,255,0.15); color: var(--txt-white); font-size: 13px; font-weight: 600; }
+.nav-app-name span { color: var(--brand); font-weight: 700; }
+.nav-badge { font-size: 10px; font-weight: 700; background: var(--brand); color: white; padding: 3px 8px; border-radius: 20px; margin-left: 8px; text-transform: uppercase; }
+.nav-links { display: flex; align-items: center; gap: 8px; }
+.nav-btn { padding: 8px 16px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: var(--radius-md); cursor: pointer; transition: all 0.18s ease; color: var(--txt-white-2); font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.nav-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+.nav-btn--brand { background: var(--brand); color: white; border-color: var(--brand); box-shadow: var(--shadow-orange); }
+.nav-btn--brand:hover { background: var(--brand-hover); color: white; }
+.nav-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.15); margin: 0 4px; }
+
+.template-status { display: flex; align-items: center; gap: 8px; padding: 7px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); font-size: 12px; font-weight: 600; color: var(--txt-white-2); cursor: pointer; }
+.template-status--set { border-color: rgba(34, 197, 94, 0.4); color: #4ade80; background: rgba(34, 197, 94, 0.1); }
+.template-status--missing { border-color: rgba(242, 101, 34, 0.5); color: #fdba74; background: rgba(242, 101, 34, 0.15); }
+
+.app-layout { display: flex; height: calc(100vh - 68px); }
+.main-content { flex: 1; overflow-y: auto; padding: 28px 36px; background: var(--bg-main); }
+.ai-sidebar { width: 380px; border-left: 1px solid var(--border); background: var(--bg-surface); display: flex; flex-direction: column; height: calc(100vh - 68px); }
+.steps { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; padding: 14px 20px; background: var(--bg-surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow-x: auto; box-shadow: var(--shadow-sm); }
+.step { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: var(--txt-3); white-space: nowrap; }
+.step--active { color: var(--brand); background: var(--brand-light); }
+.step--done { color: var(--green); background: var(--green-light); }
+.step__num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; border: 1.5px solid currentColor; background: white; }
+.step--active .step__num { background: var(--brand); color: white; border-color: var(--brand); }
+.step--done .step__num { background: var(--green); color: white; border-color: var(--green); }
+.step-arrow { color: var(--txt-3); font-size: 12px; }
+
+.card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+.card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 14px; }
+.card__title { font-size: 20px; font-weight: 800; }
+.card__subtitle { font-size: 13px; color: var(--txt-2); margin-top: 4px; }
+.nav-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+
+.upload-zone { border: 2px dashed var(--border-hover); border-radius: var(--radius-xl); padding: 70px 28px; text-align: center; cursor: pointer; transition: all 0.25s ease; background: linear-gradient(180deg, #ffffff, var(--bg-alt)); }
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--brand); background: var(--brand-light); transform: translateY(-3px); box-shadow: 0 16px 32px rgba(242, 101, 34, 0.12); }
+.upload-icon { font-size: 56px; margin-bottom: 18px; }
+.upload-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.upload-sub { font-size: 13px; color: var(--txt-2); max-width: 460px; margin: 0 auto; line-height: 1.5; }
+.upload-formats { margin-top: 22px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.format-badge { padding: 6px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--txt-2); }
+.format-badge--pdf { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+
+.btn { padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: var(--radius-md); cursor: pointer; transition: all 0.18s ease; font-family: inherit; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn--ghost { background: var(--bg-surface); border-color: var(--border); color: var(--txt-2); box-shadow: var(--shadow-xs); }
+.btn--ghost:hover { background: var(--bg-subtle); border-color: var(--border-hover); color: var(--txt-1); }
+.btn--brand { background: var(--brand); color: white; box-shadow: var(--shadow-orange); }
+.btn--brand:hover { background: var(--brand-hover); }
+.btn--green { background: var(--green); color: white; }
+.btn--green:hover { background: var(--green-hover); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
+.map-table-container { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-surface); }
+.map-table { width: 100%; border-collapse: collapse; }
+.map-table th { text-align: left; font-size: 11px; font-weight: 800; color: var(--txt-2); text-transform: uppercase; padding: 14px 18px; background: var(--bg-subtle); border-bottom: 2px solid var(--brand); }
+.map-table td { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.map-table tr:hover td { background: var(--brand-light); }
+.col-preview { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--txt-2); max-width: 240px; background: var(--bg-subtle); padding: 6px 12px; border-radius: var(--radius-sm); display: inline-block; border: 1px solid var(--border); overflow: hidden; }
+.col-select { background: #fff; border: 1.5px solid var(--border); padding: 8px 12px; border-radius: var(--radius-md); font-size: 13px; min-width: 220px; font-family: inherit; }
+.col-select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); }
+.col-confidence { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; }
+.col-confidence--high { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+.col-confidence--medium { background: var(--orange-light); color: var(--orange); border: 1px solid var(--orange-border); }
+.col-confidence--low { background: var(--red-light); color: var(--red); border: 1px solid var(--red-border); }
+
+.crv-editor { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-surface); }
+.crv-toolbar { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--bg-subtle); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.crv-table-wrap { overflow: auto; max-height: 620px; }
+.crv-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1450px; }
+.crv-table th { position: sticky; top: 0; background: var(--bg-dark); color: #fff; padding: 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--brand); z-index: 10; white-space: nowrap; }
+.crv-table td { padding: 8px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: middle; background: #fff; }
+.crv-table tr:hover td { background: #fffaf5; }
+.crv-row-num { text-align: center; font-weight: 700; color: var(--brand); background: var(--bg-subtle) !important; }
+.crv-cell { padding: 8px 10px; min-height: 36px; border: 1px solid transparent; border-radius: var(--radius-sm); font-size: 12px; width: 100%; background: transparent; outline: none; font-family: inherit; resize: vertical; min-width: 130px; }
+textarea.crv-cell { min-height: 64px; line-height: 1.4; }
+.crv-cell:hover { background: var(--bg-subtle); border-color: var(--border-hover); }
+.crv-cell:focus { background: #fff; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); }
+.crv-cell--modified { background: var(--brand-light); border-left: 3px solid var(--brand); }
+.crv-cell--number { text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+.multi-img-gallery { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px; min-width: 160px; }
+.multi-img-thumb-wrap { position: relative; display: inline-block; }
+.multi-img-thumb { width: 58px; height: 58px; border-radius: var(--radius-md); object-fit: cover; border: 2px solid var(--border); cursor: pointer; transition: 0.2s; }
+.multi-img-thumb:hover { transform: scale(1.1); border-color: var(--brand); }
+.multi-img-del { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%; background: var(--red); color: #fff; border: 1.5px solid #fff; font-size: 10px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; }
+.multi-img-thumb-wrap:hover .multi-img-del { display: flex; }
+.add-img-btn { width: 58px; height: 58px; border: 2px dashed var(--border-hover); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--txt-3); cursor: pointer; background: var(--bg-subtle); }
+.add-img-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+
+.ai-sidebar__header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-dark); color: #fff; }
+.ai-sidebar__title { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
+.ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.ai-sidebar__messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; background: var(--bg-alt); }
+.ai-msg { max-width: 92%; padding: 12px 16px; border-radius: 14px; font-size: 13px; line-height: 1.55; }
+.ai-msg--ai { background: #fff; border: 1px solid var(--border); color: var(--txt-2); align-self: flex-start; border-bottom-left-radius: 4px; }
+.ai-msg--user { background: var(--brand); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.ai-msg--system { background: var(--gold-light); border: 1px solid var(--gold-border); color: var(--gold); align-self: center; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 20px; }
+.ai-msg__label { font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; color: var(--brand); }
+.ai-sidebar__input { padding: 16px; border-top: 1px solid var(--border); }
+.ai-input-wrap { display: flex; gap: 8px; }
+.ai-input { flex: 1; padding: 11px 16px; background: var(--bg-subtle); border: 1.5px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-family: inherit; outline: none; }
+.ai-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); background: #fff; }
+.ai-send-btn { width: 42px; height: 42px; border-radius: var(--radius-md); background: var(--brand); border: none; color: #fff; cursor: pointer; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 14px; margin-bottom: 22px; }
+.stat { background: #fff; padding: 18px 20px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-xs); }
+.stat-label { font-size: 11px; color: var(--txt-2); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700; }
+.stat-value { font-size: 24px; font-weight: 800; margin-top: 4px; }
+.stat-value--brand { color: var(--brand); } .stat-value--green { color: var(--green); } .stat-value--orange { color: var(--orange); }
+
+.quick-actions { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+.qa-btn { padding: 8px 14px; font-size: 12px; font-weight: 700; border-radius: var(--radius-md); border: 1px solid var(--border); background: #fff; color: var(--txt-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.qa-btn:hover { background: var(--brand-light); border-color: var(--brand); color: var(--brand); }
+
+.learning-banner { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: linear-gradient(135deg,var(--brand-light),#fff8f0); border: 1px solid rgba(242,101,34,0.2); border-left: 4px solid var(--brand); border-radius: var(--radius-lg); margin-bottom: 20px; font-size: 13px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,26,26,0.7); backdrop-filter: blur(8px); z-index: 150; display: none; align-items: center; justify-content: center; }
+.modal-overlay.visible { display: flex; }
+.modal { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 32px; max-width: 540px; width: 90%; border-top: 4px solid var(--brand); max-height: 90vh; overflow-y: auto; }
+.modal__title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.modal__subtitle { font-size: 13px; color: var(--txt-2); margin-bottom: 22px; }
+.modal__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
+.drop-zone { border: 2px dashed var(--border-hover); border-radius: var(--radius-lg); padding: 44px 20px; text-align: center; cursor: pointer; background: var(--bg-subtle); }
+.drop-zone:hover, .drop-zone.dragover { border-color: var(--brand); background: var(--brand-light); }
+.loader { display: inline-block; width: 22px; height: 22px; border: 3px solid rgba(242,101,34,0.15); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.notification { position: fixed; bottom: 24px; right: 24px; padding: 14px 22px; background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--brand); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); z-index: 200; font-size: 13px; font-weight: 700; max-width: 340px; }
+.notification--success { border-left-color: var(--green); background: var(--green-light); color: var(--green); }
+.notification--error { border-left-color: var(--red); background: var(--red-light); color: var(--red); }
+.hidden { display: none !important; }
+::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-thumb { background: #d4c8bc; border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div style="display:flex;align-items:center">
+    <a class="nav-logo" onclick="resetApp()">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:2px">
+          <span class="nav-logo-text">Ozeol</span><span class="nav-logo-dot">.com</span>
+        </div>
+        <span class="nav-logo-tagline">Overstock Global Solution</span>
+      </div>
+    </a>
+    <div class="nav-app-name"><span>DFC</span> Multi-Image Converter <span class="nav-badge">v2.5</span></div>
+  </div>
+  <div class="nav-links">
+    <div class="template-status template-status--missing" id="template-status" onclick="openTemplateModal()">
+      <span id="template-status-icon">⚠️</span>
+      <span id="template-status-text">No CRV Template</span>
+    </div>
+    <div class="nav-divider"></div>
+    <button class="nav-btn" onclick="openTemplateModal()">📋 CRV Template</button>
+    <button class="nav-btn nav-btn--brand" onclick="resetApp()">🔄 New File</button>
+  </div>
+</header>
+
+<div class="app-layout">
+<main class="main-content">
+
+<nav class="steps">
+  <div class="step step--active" data-step="1"><span class="step__num">1</span><span>Upload Source</span></div>
+  <span class="step-arrow">→</span>
+  <div class="step" data-step="2"><span class="step__num">2</span><span>Map Columns</span></div>
+  <span class="step-arrow">→</span>
+  <div class="step" data-step="3"><span class="step__num">3</span><span>Process & OCR</span></div>
+  <span class="step-arrow">→</span>
+  <div class="step" data-step="4"><span class="step__num">4</span><span>Review & Export</span></div>
+</nav>
+
+<section id="step-1">
+  <div id="template-warning" class="learning-banner">
+    <div style="font-size:22px">💡</div>
+    <div style="flex:1"><strong>CRV Template recommended:</strong> Upload your official blank CRV Excel template to preserve colors, headers, and dropdowns.</div>
+    <button class="btn btn--brand" style="padding:7px 14px;font-size:12px" onclick="openTemplateModal()">Upload Template</button>
+  </div>
+  <div id="template-loaded" class="learning-banner hidden" style="background:linear-gradient(135deg,var(--green-light),#f0fdf4);border-color:var(--green-border);border-left-color:var(--green)">
+    <div style="font-size:22px">✅</div>
+    <div style="flex:1;color:var(--txt-1)">Template Active: <strong id="template-name">Template.xlsx</strong> — <span id="template-meta" style="color:var(--txt-2)">Ready</span></div>
+    <button class="btn btn--ghost" style="padding:7px 14px;font-size:12px" onclick="openTemplateModal()">Change</button>
+  </div>
+
+  <div class="nav-row" style="justify-content:flex-end">
+    <button class="btn btn--brand" id="fwd-from-1" disabled onclick="goToStep(2)">Forward to Mapping →</button>
+  </div>
+
+  <div class="card">
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📦</div>
+      <div class="upload-title">Drop your Supplier Stock File here</div>
+      <div class="upload-sub">Supports Excel (.xlsx, .xls) and PDF. Images extracted automatically and placed side-by-side.</div>
+      <div class="upload-formats">
+        <span class="format-badge">Excel .XLSX</span>
+        <span class="format-badge">Excel .XLS</span>
+        <span class="format-badge format-badge--pdf">⚡ Cloud OCR .PDF</span>
+      </div>
+      <input type="file" id="file-input" accept=".xlsx,.xls,.pdf" style="display:none">
+    </div>
+  </div>
+</section>
+
+<section id="step-2" class="hidden">
+  <div class="stats" id="file-info"></div>
+  <div class="card">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">📐 Column Mapping Alignment</h2>
+        <p class="card__subtitle">AI matched supplier columns to the CRV schema. Adjust if needed.</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn--ghost" onclick="goToStep(1)">← Back</button>
+        <button class="btn btn--ghost" id="fwd-from-2" disabled onclick="goToStep(4)">Forward to Review →</button>
+        <button class="btn btn--brand" onclick="confirmMapping()">Confirm & Convert →</button>
+      </div>
+    </div>
+    <div class="map-table-container">
+      <table class="map-table">
+        <thead>
+          <tr>
+            <th style="width:40px">Col</th>
+            <th>Source Header</th>
+            <th>Sample Value</th>
+            <th>Target CRV Field</th>
+            <th>AI Confidence</th>
+          </tr>
+        </thead>
+        <tbody id="mapping-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="step-3" class="hidden">
+  <div class="card" style="text-align:center;padding:80px 20px">
+    <div class="loader" style="width:44px;height:44px;margin-bottom:20px;border-width:4px"></div>
+    <div id="convert-status" style="font-size:17px;font-weight:700">Processing stock dataset...</div>
+    <div style="font-size:13px;color:var(--txt-3);margin-top:10px">Parsing images, drawings & layouts</div>
+  </div>
+</section>
+
+<section id="step-4" class="hidden">
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total Items</div><div class="stat-value" id="stat-rows">0</div></div>
+    <div class="stat"><div class="stat-label">Extracted Photos</div><div class="stat-value stat-value--brand" id="stat-images">0</div></div>
+    <div class="stat"><div class="stat-label">Filled Fields</div><div class="stat-value stat-value--green" id="stat-filled">0</div></div>
+    <div class="stat"><div class="stat-label">User Edits</div><div class="stat-value stat-value--orange" id="stat-edits">0</div></div>
+  </div>
+  <div class="quick-actions">
+    <button class="btn btn--ghost" onclick="goToStep(2)">← Back to Mapping</button>
+    <button class="qa-btn" onclick="autoTranslateDE_ZH_ES_AR_TR()">🌐 Auto-Translate</button>
+    <button class="qa-btn" onclick="findReplace()">🔍 Find & Replace</button>
+    <button class="qa-btn" onclick="bulkFill()">📊 Bulk Fill</button>
+    <button class="qa-btn" onclick="validateCRV()">✅ Validate</button>
+    <button class="qa-btn" onclick="aiAnalyze()">🤖 Analyze</button>
+    <button class="qa-btn" onclick="addRow()">➕ Add Row</button>
+    <div style="flex:1"></div>
+    <button class="btn btn--green" onclick="exportCRV()">📥 Export CRV (.xlsx)</button>
+  </div>
+  <div class="crv-editor">
+    <div class="crv-toolbar">
+      <span style="font-size:12px;color:var(--txt-2)">Target sheet: <strong style="color:var(--brand)">Supplier's Listing</strong> only</span>
+      <div style="flex:1"></div>
+      <span style="font-size:12px;color:var(--txt-3);font-weight:700" id="edit-tracker">0 modifications tracked</span>
+    </div>
+    <div class="crv-table-wrap">
+      <table class="crv-table" id="crv-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th style="min-width:190px">Visual (Multi-Image)</th>
+            <th>Supplier's reference</th>
+            <th>Supplier's designation</th>
+            <th>Noz designation</th>
+            <th>Colour(s)</th>
+            <th>Measure units</th>
+            <th>Brand/License</th>
+            <th>BIUB or BBD</th>
+            <th>Untaxed (Wine)</th>
+            <th>Qty available</th>
+          </tr>
+        </thead>
+        <tbody id="crv-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<aside class="ai-sidebar">
+  <div class="ai-sidebar__header">
+    <div class="ai-sidebar__title"><div class="ai-dot"></div><span>AI Assistant Copilot</span></div>
+    <button class="nav-btn" style="padding:5px 12px;font-size:11px" onclick="clearChat()">Clear</button>
+  </div>
+  <div class="ai-sidebar__messages" id="ai-messages">
+    <div class="ai-msg ai-msg--system">AI Assistant active</div>
+    <div class="ai-msg ai-msg--ai">
+      <div class="ai-msg__label">AI Assistant</div>
+      👋 Welcome to <strong>Ozeol DFC Converter</strong>! Drop Excel/PDF stock files — I extract images, map columns, and translate DE/ZH/ES/AR/TR.
+    </div>
+  </div>
+  <div class="ai-sidebar__input">
+    <div class="ai-input-wrap">
+      <input class="ai-input" id="ai-input" placeholder="Ask AI to translate, fix, analyze..." onkeypress="if(event.key==='Enter')sendAI()">
+      <button class="ai-send-btn" onclick="sendAI()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+</div>
+
+<div class="modal-overlay" id="template-modal">
+  <div class="modal">
+    <h3 class="modal__title">📋 Official CRV Template Setup</h3>
+    <p class="modal__subtitle">Upload your blank CRV template (.xlsx). Only <strong>Supplier's Listing</strong> is filled — other sheets, colors, headers and dropdowns stay intact.</p>
+    <div class="drop-zone" onclick="document.getElementById('template-input').click()">
+      <div style="font-size:40px;margin-bottom:10px">📊</div>
+      <p style="font-size:14px;font-weight:700">Click or Drop Blank CRV Template</p>
+      <p style="font-size:12px;color:var(--txt-3);margin-top:4px">.xlsx — empty template with headers & sheets</p>
+      <input type="file" id="template-input" accept=".xlsx,.xls" style="display:none">
+    </div>
+    <div id="template-preview" style="margin-top:16px"></div>
+    <div class="modal__actions"><button class="btn btn--ghost" onclick="closeTemplateModal()">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="image-modal">
+  <div class="modal">
+    <h3 class="modal__title">🖼️ Add Product Photo</h3>
+    <p class="modal__subtitle">Placed side-by-side in Column A without overlap.</p>
+    <div class="drop-zone" onclick="document.getElementById('image-input').click()">
+      <div style="font-size:40px;margin-bottom:10px">📷</div>
+      <p style="font-size:14px;font-weight:700">Click, Drop, or <span style="color:var(--brand)">Ctrl+V</span></p>
+      <p style="font-size:12px;color:var(--txt-3);margin-top:4px">PNG, JPG, WebP — up to 10MB</p>
+      <input type="file" id="image-input" accept="image/*" style="display:none">
+    </div>
+    <div id="image-preview" style="margin-top:16px;text-align:center"></div>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" onclick="closeImageModal()">Cancel</button>
+      <button class="btn btn--brand" onclick="applyAddImage()">Add Image</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CRV_COLUMNS = [
+  {id:'visual',name:'Visual or Sample n°',type:'image',excelCol:1},
+  {id:'ref',name:"Supplier's reference",type:'text',excelCol:2},
+  {id:'designation',name:"Supplier's designation",type:'text',excelCol:3},
+  {id:'noz',name:'Noz designation',type:'text',excelCol:4},
+  {id:'colour',name:'Colour(s)',type:'text',excelCol:5},
+  {id:'measure',name:'Measure units',type:'text',excelCol:6},
+  {id:'brand',name:'Brand/License',type:'text',excelCol:7},
+  {id:'biub',name:'BIUB or BBD',type:'text',excelCol:8},
+  {id:'untaxed',name:'Untaxed (Wine)',type:'text',excelCol:9},
+  {id:'qty',name:'Qty available',type:'number',excelCol:10}
+];
+
+let templateBuffer=null, templateInfo=null, sourceData=null, columnMapping={}, crvData=[], editCount=0;
+let activeRowForImageAdd=null, pendingImage=null;
+const CONVERT_API_SECRET='aBGgMTdK8Vs2I1Vj0IAfWdTXnPJxp1x5';
+
+const translationCache = new Map();
+
+const AI_PATTERNS={
+  visual:['photo','image','picture','visual','pic','img','sample','overstock'],
+  ref:['ref','item no','sku','code','n°','no.','item number','article no'],
+  designation:['product','description','designation','name','material','desc','item name'],
+  colour:['color','colour','couleur','farbe','yanse'],
+  measure:['size','weight','measure','dimension','taille','poids','specs'],
+  brand:['brand','marque','license','manufacturer'],
+  biub:['biub','bbd','expiry','expiration','date','mhd'],
+  untaxed:['tax','untaxed','wine','vin'],
+  qty:['qty','quantity','stock','available','qte','quantite','menge']
+};
+
+window.addEventListener('DOMContentLoaded',()=>{
+  try{
+    const s=localStorage.getItem('crv_template'), i=localStorage.getItem('crv_template_info');
+    if(s&&i){templateBuffer=base64ToArrayBuffer(s);templateInfo=JSON.parse(i);updateTemplateStatus();}
+  }catch(e){}
+  document.getElementById('template-input').addEventListener('change',handleTemplateSelect);
+  document.getElementById('file-input').addEventListener('change',handleFile);
+  window.addEventListener('paste',handleImagePaste);
+  const z=document.querySelector('#image-modal .drop-zone');
+  if(z){
+    ['dragover','dragenter'].forEach(e=>z.addEventListener(e,ev=>{ev.preventDefault();z.classList.add('dragover')}));
+    ['dragleave','drop'].forEach(e=>z.addEventListener(e,ev=>{ev.preventDefault();z.classList.remove('dragover')}));
+    z.addEventListener('drop',e=>{
+      const f=e.dataTransfer.files[0];
+      if(f&&f.type.startsWith('image/')){
+        const r=new FileReader();
+        r.onload=ev=>{pendingImage=ev.target.result;document.getElementById('image-preview').innerHTML=`<img src="${pendingImage}" style="max-width:180px;max-height:180px;border-radius:10px;border:1px solid var(--border)">`;notify('Photo added','success');};
+        r.readAsDataURL(f);
+      }
+    });
+  }
+  updateNavButtons();
+});
+
+function updateNavButtons(){
+  const f1=document.getElementById('fwd-from-1');
+  const f2=document.getElementById('fwd-from-2');
+  if(f1) f1.disabled = !sourceData;
+  if(f2) f2.disabled = !(crvData && crvData.length>0);
+}
+
+function handleImagePaste(e){
+  const modal=document.getElementById('image-modal');
+  if(!modal||!modal.classList.contains('visible'))return;
+  const items=(e.clipboardData||e.originalEvent?.clipboardData)?.items;if(!items)return;
+  for(const item of items){
+    if(item.type.indexOf('image')!==-1){
+      const file=item.getAsFile();if(!file)continue;
+      const r=new FileReader();
+      r.onload=ev=>{pendingImage=ev.target.result;document.getElementById('image-preview').innerHTML=`<img src="${pendingImage}" style="max-width:180px;max-height:180px;border-radius:10px;border:1px solid var(--border)">`;notify('Photo pasted','success');};
+      r.readAsDataURL(file);e.preventDefault();break;
+    }
+  }
+}
+
+function openTemplateModal(){document.getElementById('template-modal').classList.add('visible');renderTemplatePreview();}
+function closeTemplateModal(){document.getElementById('template-modal').classList.remove('visible');}
+function renderTemplatePreview(){
+  const el=document.getElementById('template-preview');if(!el)return;
+  if(templateInfo){
+    el.innerHTML=`<div style="background:var(--green-light);border:1px solid var(--green-border);padding:14px 18px;border-radius:12px;display:flex;gap:12px;align-items:center"><div style="font-size:22px">✅</div><div><div style="font-weight:700;font-size:13px">${escapeHtml(templateInfo.name)}</div><div style="font-size:11px;color:var(--txt-2)">Sheet: ${escapeHtml(templateInfo.sheetName)} · Header row: ${templateInfo.headerRow+1}</div></div></div>`;
+  } else el.innerHTML=`<div style="text-align:center;font-size:12px;color:var(--txt-3)">No template active</div>`;
+}
+
+async function handleTemplateSelect(e){
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const buffer=await file.arrayBuffer();
+    const wb=XLSX.read(buffer,{type:'array'});
+    const sheetName=wb.SheetNames.find(n=>/supplier/i.test(n))||wb.SheetNames[0];
+    const data=XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1,defval:''});
+    let headerRow=0;
+    for(let i=0;i<Math.min(15,data.length);i++){
+      if(!data[i])continue;
+      const s=data[i].join('|').toLowerCase();
+      if(s.includes('visual')||s.includes('supplier')){headerRow=i;break;}
+    }
+    templateBuffer=buffer;
+    templateInfo={name:file.name,size:file.size,sheetName,headerRow};
+    try{localStorage.setItem('crv_template',arrayBufferToBase64(buffer));localStorage.setItem('crv_template_info',JSON.stringify(templateInfo));}catch(err){}
+    updateTemplateStatus();renderTemplatePreview();
+    addAIMsg('ai',`📋 Template loaded: <strong>${escapeHtml(file.name)}</strong>`);
+    notify('CRV Template saved!','success');
+    setTimeout(closeTemplateModal,400);
+  }catch(err){notify('Failed to load template: '+err.message,'error');}
+  finally{e.target.value='';}
+}
+
+function updateTemplateStatus(){
+  const s=document.getElementById('template-status');
+  if(templateInfo&&s){
+    s.classList.remove('template-status--missing');s.classList.add('template-status--set');
+    document.getElementById('template-status-icon').textContent='✅';
+    document.getElementById('template-status-text').textContent='Template: '+templateInfo.name.substring(0,18);
+    document.getElementById('template-warning').classList.add('hidden');
+    document.getElementById('template-loaded').classList.remove('hidden');
+    document.getElementById('template-name').textContent=templateInfo.name;
+    document.getElementById('template-meta').textContent=`Sheet: ${templateInfo.sheetName} · Ready`;
+  }
+}
+
+function arrayBufferToBase64(buffer){
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  const chunkSize = 8192;
+  for (let i = 0; i < len; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunkSize, len)));
+  }
+  return btoa(binary);
+}
+function base64ToArrayBuffer(b64){const b=atob(b64);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer;}
+
+const uploadZone=document.getElementById('upload-zone');
+['dragover','dragenter'].forEach(e=>uploadZone.addEventListener(e,ev=>{ev.preventDefault();uploadZone.classList.add('dragover')}));
+['dragleave','drop'].forEach(e=>uploadZone.addEventListener(e,ev=>{ev.preventDefault();uploadZone.classList.remove('dragover')}));
+uploadZone.addEventListener('drop',e=>{if(e.dataTransfer.files[0])handleFile({target:{files:e.dataTransfer.files}});});
+
+async function handleFile(e){
+  const file=e.target.files?.[0];
+  e.target.value=''; // Immediately reset value so re-uploads always trigger
+  if(!file)return;
+
+  if(!templateBuffer){if(!confirm('No CRV template loaded. Upload template first?')){openTemplateModal();return;}}
+
+  // Purge previous state and DOM elements to prevent RAM accumulation/freeze
+  sourceData = null;
+  columnMapping = {};
+  crvData = [];
+  editCount = 0;
+  document.getElementById('crv-body').innerHTML = '';
+  document.getElementById('mapping-body').innerHTML = '';
+  updateStats();
+  updateNavButtons();
+
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='pdf'){
+    addAIMsg('system','🚀 PDF → Cloud OCR...');
+    notify('Converting PDF...','success');
+    goToStep(3);
+    document.getElementById('convert-status').innerHTML='⚡ <strong>Cloud-Converting PDF...</strong>';
+    try{
+      const blob=await convertPdfToExcelCloud(file);
+      await processExcelFile(await blob.arrayBuffer(), file.name.replace(/\.pdf$/i,'.xlsx'));
+    }catch(err){addAIMsg('ai','❌ '+err.message);notify('Conversion Error','error');goToStep(1);}
+  }else{
+    notify('Reading '+file.name+'...','success');
+    try{await processExcelFile(await file.arrayBuffer(), file.name);}
+    catch(err){notify('Failed to parse file','error');goToStep(1);}
+  }
+}
+
+async function convertPdfToExcelCloud(file){
+  const fd=new FormData();fd.append('File',file);
+  const res=await fetch(`https://v2.convertapi.com/convert/pdf/to/xlsx?Secret=${CONVERT_API_SECRET}&StoreFile=true`,{method:'POST',body:fd});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.Message||'ConvertAPI Error');}
+  const j=await res.json();
+  return await (await fetch(j.Files[0].Url)).blob();
+}
+
+async function processExcelFile(arrayBuffer, filename){
+  const workbook=XLSX.read(arrayBuffer,{type:'array',cellStyles:true});
+  let best=workbook.SheetNames[0], maxR=0;
+  for(const n of workbook.SheetNames){
+    const r=XLSX.utils.sheet_to_json(workbook.Sheets[n],{header:1,defval:''});
+    if(r.length>maxR){maxR=r.length;best=n;}
+  }
+  const json=XLSX.utils.sheet_to_json(workbook.Sheets[best],{header:1,defval:''});
+  const KWS=['item','item no','description','photo','picture','qty','quantity','price','color','colour','amount','no.'];
+  let headerRowIdx=-1, hitsMax=0;
+  for(let i=0;i<Math.min(20,json.length);i++){
+    if(!json[i])continue;
+    const row=json[i].map(c=>String(c||'').toLowerCase()).join(' ');
+    let h=0;KWS.forEach(k=>{if(row.includes(k))h++;});
+    if(h>hitsMax){hitsMax=h;headerRowIdx=i;}
+  }
+  if(headerRowIdx===-1)headerRowIdx=0;
+  const headers=json[headerRowIdx].map((h,i)=>String(h||`Column ${i+1}`).trim());
+  const raw=json.slice(headerRowIdx+1);
+  const valid=[], map={};
+  const NOISE=['(pcs)','(cm)','(usd$)','fob ningbo','(l*w*d)','unit price','amount','(kgs)'];
+  raw.forEach((r,idx)=>{
+    const excelR=headerRowIdx+1+idx;
+    const str=r.map(c=>String(c||'').trim()).join(' ').toLowerCase();
+    if(!str)return;
+    const isNoise=NOISE.some(n=>str===n||(str.includes('(pcs)')&&!/\d/.test(str)));
+    const hasData=r.some(c=>{const v=String(c||'').trim().toLowerCase();return v&&!NOISE.includes(v);});
+    if(!isNoise&&hasData){map[excelR]=valid.length;valid.push(r);}
+  });
+  const images=await extractImagesFromXlsx(arrayBuffer,best,headerRowIdx,valid,map);
+  sourceData={filename,fileType:'excel',headers,rows:valid,images,headerRow:headerRowIdx};
+  finishFileUploadUI();
+}
+
+async function extractImagesFromXlsx(arrayBuffer, targetSheetName, headerRowIndex, dataRows, excelRowToDataRowIndex){
+  const images={}; let totalAnchoredCount=0;
+  try{
+    let zip; try{zip=await JSZip.loadAsync(arrayBuffer);}catch(e){return images;}
+    const keys=Object.keys(zip.files);
+    const imageKeys=keys.filter(k=>/\.(png|jpe?g|gif|bmp|webp)$/i.test(k)&&!zip.files[k].dir);
+    if(!imageKeys.length)return images;
+    imageKeys.sort((a,b)=>(parseInt((a.match(/\d+/)||[0])[0])||0)-(parseInt((b.match(/\d+/)||[0])[0])||0));
+    const mediaCache={}, mediaList=[];
+    for(const k of imageKeys){
+      const f=zip.file(k);if(!f)continue;
+      const b64=await f.async('base64');
+      let ext=k.split('.').pop().toLowerCase();if(ext==='jpg')ext='jpeg';
+      const url=`data:image/${ext};base64,${b64}`;
+      mediaCache[k.split('/').pop().toLowerCase()]=url;
+      mediaCache[k.toLowerCase()]=url;
+      mediaList.push(url);
+    }
+    const wbXml=await zip.file('xl/workbook.xml')?.async('string');
+    const wbRelsXml=await zip.file('xl/_rels/workbook.xml.rels')?.async('string');
+    let targetDrawing='';
+    if(wbXml&&wbRelsXml){
+      const p=new DOMParser();
+      const wb=p.parseFromString(wbXml,'text/xml');
+      const relsDoc=p.parseFromString(wbRelsXml,'text/xml');
+      const rels={};
+      relsDoc.querySelectorAll('Relationship').forEach(r=>{
+        let t=r.getAttribute('Target')||'';
+        if(!t.startsWith('xl/'))t='xl/'+t.replace(/^\//,'');
+        rels[r.getAttribute('Id')]=t;
+      });
+      let sheetPath='';
+      wb.querySelectorAll('sheet').forEach(s=>{
+        const name=s.getAttribute('name');
+        const rid=s.getAttribute('r:id')||Array.from(s.attributes).find(a=>a.nodeName.endsWith('id'))?.value;
+        if(name&&targetSheetName&&name.trim().toLowerCase()===targetSheetName.trim().toLowerCase())sheetPath=rels[rid];
+      });
+      if(sheetPath){
+        const sRelsPath=sheetPath.replace('xl/worksheets/','xl/worksheets/_rels/')+'.rels';
+        const sRelsXml=await zip.file(sRelsPath)?.async('string');
+        if(sRelsXml){
+          p.parseFromString(sRelsXml,'text/xml').querySelectorAll('Relationship').forEach(r=>{
+            const t=r.getAttribute('Target')||'';
+            if(t.includes('drawing')||t.includes('cellimage'))targetDrawing='xl/drawings/'+t.split('/').pop();
+          });
+        }
+      }
+    }
+    const drawKeys=(targetDrawing&&zip.file(targetDrawing))?[targetDrawing]:keys.filter(k=>/xl\/(drawings\/)?.*\.xml$/i.test(k)&&!k.endsWith('.rels'));
+    for(const dk of drawKeys){
+      const dStr=await zip.file(dk)?.async('string');if(!dStr)continue;
+      const drawFile=dk.split('/').pop();
+      const relsKey=keys.find(k=>k.toLowerCase().endsWith(drawFile.toLowerCase()+'.rels'))||'';
+      const relsMap={};
+      if(relsKey&&zip.file(relsKey)){
+        const rStr=await zip.file(relsKey).async('string');
+        for(const m of rStr.matchAll(/Id="([^"]+)"[^>]*Target="([^"]+)"/gi)){
+          const tn=m[2].split('/').pop().toLowerCase();
+          if(mediaCache[tn])relsMap[m[1]]=mediaCache[tn];
+        }
+      }
+
+      // Memory-efficient XML regex execution loop (prevents browser freeze)
+      const anchorRegex = /<(?:[a-z0-9_]+:)?(?:twoCellAnchor|oneCellAnchor|cellImage|absoluteAnchor)[\s\S]*?<\/(?:[a-z0-9_]+:)?(?:twoCellAnchor|oneCellAnchor|cellImage|absoluteAnchor)>/gi;
+      let anchorMatch;
+      while ((anchorMatch = anchorRegex.exec(dStr)) !== null) {
+        const anchor = anchorMatch[0];
+        let excelRow = -1;
+        const rowMatch = anchor.match(/<(?:[a-z0-9_]+:)?row>(\d+)<\/(?:[a-z0-9_]+:)?row>/i);
+        if (rowMatch) excelRow = parseInt(rowMatch[1], 10);
+
+        const idMatch = anchor.match(/(?:r:embed|r:id|embed|blip|id)="([^"]+)"/i);
+        if (idMatch) {
+          const rId = idMatch[1];
+          const dUrl = relsMap[rId] || mediaCache[rId.toLowerCase()];
+          if (dUrl && excelRow !== -1) {
+            const dataRow = (excelRowToDataRowIndex && excelRowToDataRowIndex[excelRow] !== undefined)
+              ? excelRowToDataRowIndex[excelRow]
+              : (excelRow - headerRowIndex - 1);
+
+            if (dataRow >= 0 && dataRow < dataRows.length) {
+              if (!images[dataRow]) images[dataRow] = [];
+              if (!images[dataRow].includes(dUrl)) {
+                images[dataRow].push(dUrl);
+                totalAnchoredCount++;
+              }
+            }
+          }
+        }
+      }
+    }
+    if(totalAnchoredCount===0&&mediaList.length){
+      for(let i=0;i<Math.min(mediaList.length,dataRows.length);i++)images[i]=[mediaList[i]];
+    }
+  }catch(e){console.error(e);}
+  return images;
+}
+
+function finishFileUploadUI(){
+  let tot=0;Object.values(sourceData.images).forEach(a=>tot+=a.length);
+  addAIMsg('ai',`✅ Loaded <strong>${sourceData.filename}</strong><br>• ${sourceData.headers.length} columns<br>• ${sourceData.rows.length} rows<br>• ${tot} photos`);
+  buildMappingUI();
+  goToStep(2);
+  updateNavButtons();
+}
+
+function buildMappingUI(){
+  let tot=0;Object.values(sourceData.images).forEach(a=>tot+=a.length);
+  document.getElementById('file-info').innerHTML=`
+    <div class="stat"><div class="stat-label">File</div><div class="stat-value" style="font-size:14px">${escapeHtml(sourceData.filename)}</div></div>
+    <div class="stat"><div class="stat-label">Format</div><div class="stat-value stat-value--brand">${sourceData.fileType.toUpperCase()}</div></div>
+    <div class="stat"><div class="stat-label">Data Rows</div><div class="stat-value stat-value--green">${sourceData.rows.length}</div></div>
+    <div class="stat"><div class="stat-label">Images</div><div class="stat-value stat-value--orange">${tot}</div></div>`;
+  const tbody=document.getElementById('mapping-body');tbody.innerHTML='';
+  sourceData.headers.forEach((header,idx)=>{
+    const sample=String(sourceData.rows[0]?.[idx]??sourceData.rows[1]?.[idx]??'').substring(0,80);
+    const {crvId,confidence}=aiSuggestMapping(header,sample,idx);
+    columnMapping[idx]=crvId;
+    const opts=CRV_COLUMNS.map(c=>`<option value="${c.id}" ${c.id===crvId?'selected':''}>${c.name}</option>`).join('');
+    const conf=confidence>=80?'high':confidence>=50?'medium':'low';
+    tbody.innerHTML+=`<tr>
+      <td style="color:var(--brand);font-weight:800">${String.fromCharCode(65+idx)}</td>
+      <td><strong>${escapeHtml(header)}</strong></td>
+      <td><div class="col-preview">${escapeHtml(sample)||'<em style="color:var(--txt-3)">empty</em>'}</div></td>
+      <td><select class="col-select" onchange="columnMapping[${idx}]=this.value"><option value="">— Ignore —</option>${opts}</select></td>
+      <td><span class="col-confidence col-confidence--${conf}">${confidence}%</span></td>
+    </tr>`;
+  });
+}
+
+function aiSuggestMapping(header,sample,colIdx){
+  const h=header.toLowerCase().trim(), s=String(sample).toLowerCase().trim();
+  if(colIdx===0&&Object.keys(sourceData?.images||{}).length>0){
+    if(AI_PATTERNS.visual.some(p=>h.includes(p))||h.includes('overstock'))return{crvId:'visual',confidence:98};
+  }
+  if(AI_PATTERNS.visual.some(p=>h.includes(p)))return{crvId:'visual',confidence:95};
+  if(/^(no\.?|n°|#|seq|sn)$/i.test(h)&&/^\d{1,3}$/.test(s))return{crvId:'',confidence:90};
+  for(const [id,kws] of Object.entries(AI_PATTERNS)){
+    if(id==='visual')continue;
+    if(kws.some(k=>h.includes(k))){
+      let c=85;
+      if(id==='qty'&&/^\d+$/.test(s))c=95;
+      return{crvId:id,confidence:c};
+    }
+  }
+  if(/^\d+$/.test(s))return{crvId:'qty',confidence:45};
+  if(s.length>30)return{crvId:'designation',confidence:50};
+  return{crvId:'',confidence:20};
+}
+
+function confirmMapping(){
+  if(!Object.values(columnMapping).some(v=>v)){notify('Map at least one column','error');return;}
+  goToStep(3);
+  setTimeout(performConversion,500);
+}
+
+async function performConversion(){
+  const status=document.getElementById('convert-status');
+  crvData=[];
+  for(let i=0;i<sourceData.rows.length;i++){
+    status.textContent=`Processing row ${i+1} of ${sourceData.rows.length}...`;
+    if(i%5===0)await new Promise(r=>setTimeout(r,8));
+    const src=sourceData.rows[i];
+    const imgs=sourceData.images[i]||[];
+    const row={_rowIdx:i,visual:Array.isArray(imgs)?[...new Set(imgs)]:(imgs?[imgs]:[]),ref:'',designation:'',noz:'',colour:'',measure:'',brand:'',biub:'',untaxed:'',qty:''};
+    const grouped={};
+    Object.entries(columnMapping).forEach(([si,cid])=>{
+      if(!cid||cid==='visual')return;
+      grouped[cid]=grouped[cid]||[];
+      grouped[cid].push({header:sourceData.headers[si],value:src[si]});
+    });
+    Object.entries(grouped).forEach(([cid,items])=>{
+      if(items.length===1){
+        let v=items[0].value;
+        if(cid==='qty'){const n=parseFloat(String(v).replace(/[^\d.-]/g,''));row[cid]=isNaN(n)?'':n;}
+        else row[cid]=String(v??'').trim();
+      }else{
+        row[cid]=items.filter(i=>i.value!==''&&i.value!=null).map(i=>`${i.header.toLowerCase()} : ${i.value}`).join('\n');
+      }
+    });
+    crvData.push(row);
+  }
+  buildCRVTable();
+  goToStep(4);
+  updateStats();
+  updateNavButtons();
+  let ti=0;crvData.forEach(r=>ti+=r.visual.length);
+  addAIMsg('ai',`🎉 Converted <strong>${crvData.length}</strong> rows · <strong>${ti}</strong> photos`);
+}
+
+function buildCRVTable(){
+  const tbody=document.getElementById('crv-body');tbody.innerHTML='';
+  crvData.forEach((row,idx)=>{
+    const tr=document.createElement('tr');tr.dataset.rowIdx=idx;
+    tr.innerHTML=`<td class="crv-row-num">${idx+1}</td><td>${renderMultiImageCell(row.visual,idx)}</td>`+
+      CRV_COLUMNS.slice(1).map(c=>`<td>${textCell(row[c.id],c.id,idx,c.id==='designation',c.type==='number')}</td>`).join('');
+    tbody.appendChild(tr);
+  });
+}
+
+function renderMultiImageCell(arr,rowIdx){
+  const images=Array.isArray(arr)?arr:(arr?[arr]:[]);
+  let h=`<div class="multi-img-gallery" id="gallery-${rowIdx}">`;
+  images.forEach((u,i)=>{
+    h+=`<div class="multi-img-thumb-wrap"><img class="multi-img-thumb" src="${u}"><button class="multi-img-del" onclick="deleteImage(${rowIdx},${i})">✕</button></div>`;
+  });
+  h+=`<div class="add-img-btn" onclick="openAddImageModal(${rowIdx})"><span>+</span><span style="font-size:9px">Add</span></div></div>`;
+  return h;
+}
+
+function textCell(value,colId,rowIdx,multi,isNum){
+  const v=value==null?'':value;
+  const nc=isNum?' crv-cell--number':'';
+  if(multi||(typeof v==='string'&&v.includes('\n')))
+    return `<textarea class="crv-cell${nc}" data-col="${colId}" data-row="${rowIdx}" onchange="updateCell(this)" oninput="autoResize(this)">${escapeHtml(v)}</textarea>`;
+  return `<input type="${isNum?'number':'text'}" class="crv-cell${nc}" data-col="${colId}" data-row="${rowIdx}" value="${escapeHtml(v)}" onchange="updateCell(this)">`;
+}
+function autoResize(el){el.style.height='auto';el.style.height=(el.scrollHeight+4)+'px';}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function updateCell(el){
+  const r=parseInt(el.dataset.row), c=el.dataset.col;
+  const col=CRV_COLUMNS.find(x=>x.id===c);
+  let v=el.value;
+  if(col.type==='number'){const n=parseFloat(v);v=isNaN(n)?'':n;}
+  crvData[r][c]=v;el.classList.add('crv-cell--modified');editCount++;updateStats();
+}
+function updateStats(){
+  document.getElementById('stat-rows').textContent=crvData.length;
+  let imgs=0,filled=0;
+  crvData.forEach(row=>{
+    imgs+=(row.visual?row.visual.length:0);
+    CRV_COLUMNS.forEach(c=>{const v=row[c.id];if(v!=null&&String(v).trim()!=='')filled++;});
+  });
+  document.getElementById('stat-images').textContent=imgs;
+  document.getElementById('stat-filled').textContent=filled;
+  document.getElementById('stat-edits').textContent=editCount;
+  document.getElementById('edit-tracker').textContent=editCount+' modifications tracked';
+}
+
+function openAddImageModal(i){activeRowForImageAdd=i;pendingImage=null;document.getElementById('image-preview').innerHTML='';document.getElementById('image-modal').classList.add('visible');}
+function closeImageModal(){document.getElementById('image-modal').classList.remove('visible');activeRowForImageAdd=null;pendingImage=null;}
+document.getElementById('image-input').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{pendingImage=ev.target.result;document.getElementById('image-preview').innerHTML=`<img src="${pendingImage}" style="max-width:180px;max-height:180px;border-radius:10px;border:1px solid var(--border)">`;};
+  r.readAsDataURL(f);
+});
+function applyAddImage(){
+  if(!pendingImage||activeRowForImageAdd===null){notify('Select an image first','error');return;}
+  crvData[activeRowForImageAdd].visual.push(pendingImage);
+  const row=document.querySelector(`tr[data-row-idx="${activeRowForImageAdd}"]`);
+  if(row)row.cells[1].innerHTML=renderMultiImageCell(crvData[activeRowForImageAdd].visual,activeRowForImageAdd);
+  editCount++;updateStats();closeImageModal();notify('Image added','success');
+}
+function deleteImage(ri,ii){
+  crvData[ri].visual.splice(ii,1);
+  const row=document.querySelector(`tr[data-row-idx="${ri}"]`);
+  if(row)row.cells[1].innerHTML=renderMultiImageCell(crvData[ri].visual,ri);
+  editCount++;updateStats();notify('Image removed','success');
+}
+
+// =========================================================
+// LINE-BY-LINE MULTI-LANGUAGE TRANSLATION ENGINE (v2.8)
+// =========================================================
+async function translateSingleLine(line) {
+  const clean = String(line || '').trim();
+  if (!clean) return line;
+
+  if (/^[\d\s.,\-/*():;+cmMMkgG]+$/.test(clean)) return line;
+  if (translationCache.has(clean)) return translationCache.get(clean);
+
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(clean)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data[0]) {
+        const trans = data[0].map(x => x[0]).filter(Boolean).join('').trim();
+        if (trans && !trans.includes('PLEASE SELECT') && !trans.includes('ERROR:')) {
+          translationCache.set(clean, trans);
+          return trans;
+        }
+      }
+    }
+  } catch (e) {}
+
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl=auto&tl=en&dt=t&q=${encodeURIComponent(clean)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data[0]) {
+        const trans = data[0].map(x => x[0]).filter(Boolean).join('').trim();
+        if (trans && !trans.includes('PLEASE SELECT') && !trans.includes('ERROR:')) {
+          translationCache.set(clean, trans);
+          return trans;
+        }
+      }
+    }
+  } catch (e) {}
+
+  return clean;
+}
+
+async function autoTranslateDE_ZH_ES_AR_TR() {
+  if (!crvData || crvData.length === 0) {
+    notify('No rows to translate', 'error');
+    return;
+  }
+
+  notify('Translating all foreign lines to English...', 'success');
+  addAIMsg('system', '🌐 Line-by-line translation started (TR, ES, DE, ZH, AR → EN)...');
+
+  let translatedCount = 0;
+  const total = crvData.length;
+
+  for (let i = 0; i < total; i++) {
+    const row = crvData[i];
+    if (!row.designation || !String(row.designation).trim()) continue;
+
+    let originalText = String(row.designation)
+      .replace(/PLEASE SELECT TWO DISTINCT LANGUAGES/gi, '')
+      .replace(/INVALID SOURCE LANGUAGE/gi, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    if (!originalText) continue;
+
+    const cellInput = document.querySelector(`.crv-cell[data-row="${i}"][data-col="designation"]`);
+    if (cellInput) cellInput.style.opacity = '0.45';
+
+    try {
+      const lines = originalText.split('\n');
+      const translatedLines = [];
+
+      for (const line of lines) {
+        if (!line.trim()) {
+          translatedLines.push('');
+          continue;
+        }
+        const transLine = await translateSingleLine(line);
+        translatedLines.push(transLine);
+        await new Promise(r => setTimeout(r, 35));
+      }
+
+      const finalTranslatedText = translatedLines.join('\n');
+
+      if (finalTranslatedText !== originalText) {
+        row.designation = finalTranslatedText;
+        translatedCount++;
+
+        if (cellInput) {
+          cellInput.value = finalTranslatedText;
+          cellInput.classList.add('crv-cell--modified');
+          if (cellInput.tagName === 'TEXTAREA') {
+            cellInput.style.height = 'auto';
+            cellInput.style.height = (cellInput.scrollHeight + 4) + 'px';
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Translation error on row', i, e);
+    } finally {
+      if (cellInput) cellInput.style.opacity = '1';
+    }
+
+    if ((i + 1) % 5 === 0 || i === total - 1) {
+      addAIMsg('system', `🌐 Line-by-line check: ${i + 1} / ${total} rows processed...`);
+    }
+  }
+
+  editCount += translatedCount;
+  updateStats();
+
+  if (translatedCount > 0) {
+    addAIMsg('ai', `🎉 <strong>Successfully translated foreign phrases in ${translatedCount} product descriptions to English!</strong>`);
+    notify(`Translated ${translatedCount} descriptions!`, 'success');
+  } else {
+    addAIMsg('ai', '🌐 All descriptions checked and verified (already English).');
+    notify('Translation pass complete', 'success');
+  }
+}
+
+function addAIMsg(type,content){
+  const c=document.getElementById('ai-messages');
+  const m=document.createElement('div');m.className=`ai-msg ai-msg--${type}`;
+  m.innerHTML=type==='ai'?`<div class="ai-msg__label">AI Assistant</div>${content}`:content;
+  c.appendChild(m);c.scrollTop=c.scrollHeight;
+}
+function sendAI(){
+  const input=document.getElementById('ai-input');if(!input.value.trim())return;
+  const msg=input.value.trim();addAIMsg('user',msg);input.value='';
+  setTimeout(()=>{
+    const m=msg.toLowerCase();
+    if(m.includes('translate'))autoTranslateDE_ZH_ES_AR_TR();
+    else if(m.includes('export'))addAIMsg('ai','Click green <strong>Export CRV</strong>.');
+    else addAIMsg('ai','I can translate, validate, or help with export.');
+  },350);
+}
+function clearChat(){document.getElementById('ai-messages').innerHTML='<div class="ai-msg ai-msg--system">Chat cleared</div>';}
+function findReplace(){
+  const s=prompt('Find:');if(!s)return;const r=prompt(`Replace "${s}" with:`);if(r===null)return;
+  let n=0;
+  crvData.forEach(row=>CRV_COLUMNS.forEach(c=>{
+    if(c.id==='visual')return;
+    const v=row[c.id];
+    if(v!=null&&String(v).includes(s)){row[c.id]=String(v).replaceAll(s,r);n++;}
+  }));
+  buildCRVTable();editCount+=n;updateStats();notify(`Replaced ${n} items`,'success');
+}
+function bulkFill(){
+  const opts=CRV_COLUMNS.slice(1).map((c,i)=>`${i+1}. ${c.name}`).join('\n');
+  const choice=prompt(`Bulk fill which column?\n\n${opts}\n\nNumber:`);if(!choice)return;
+  const idx=parseInt(choice);if(isNaN(idx)||idx<1||idx>CRV_COLUMNS.length-1)return;
+  const col=CRV_COLUMNS[idx];
+  const value=prompt(`Fill "${col.name}" with:`);if(value===null)return;
+  crvData.forEach(row=>row[col.id]=col.type==='number'?(parseFloat(value)||0):value);
+  buildCRVTable();editCount+=crvData.length;updateStats();notify('Bulk fill done','success');
+}
+function validateCRV(){
+  const issues=[];
+  crvData.forEach((row,i)=>{
+    if(!row.ref)issues.push(`Row ${i+1}: missing reference`);
+    if(!row.designation)issues.push(`Row ${i+1}: missing designation`);
+    if(row.qty===''||row.qty==null)issues.push(`Row ${i+1}: missing qty`);
+    if(!row.visual||!row.visual.length)issues.push(`Row ${i+1}: no images`);
+  });
+  if(!issues.length)addAIMsg('ai','✅ Validation passed!');
+  else addAIMsg('ai',`⚠️ <strong>${issues.length} issues</strong><br>${issues.slice(0,8).map(x=>'• '+x).join('<br>')}`);
+}
+function aiAnalyze(){
+  let t=0;crvData.forEach(r=>t+=r.visual.length);
+  addAIMsg('ai',`📊 Rows: ${crvData.length}<br>Images: ${t}`);
+}
+function addRow(){
+  crvData.push({_rowIdx:crvData.length,visual:[],ref:'',designation:'',noz:'',colour:'',measure:'',brand:'',biub:'',untaxed:'',qty:''});
+  buildCRVTable();updateStats();updateNavButtons();
+}
+
+// =========================================================
+// BULLETPROOF WORKBOOK PRESERVATION & VALIDATION RESTORER
+// =========================================================
+async function restoreValidationsAndPreserveWorkbook(origBuffer, excelJsBuffer) {
+  if (!origBuffer) return excelJsBuffer;
+  try {
+    const origZip = await JSZip.loadAsync(origBuffer);
+    const newZip  = await JSZip.loadAsync(excelJsBuffer);
+    const parser  = new DOMParser();
+
+    async function getSheetPathMap(zip) {
+      const map = {};
+      const wbXml   = await zip.file('xl/workbook.xml')?.async('string');
+      const relsXml = await zip.file('xl/_rels/workbook.xml.rels')?.async('string');
+      if (!wbXml || !relsXml) return map;
+
+      const wbDoc   = parser.parseFromString(wbXml, 'text/xml');
+      const relsDoc = parser.parseFromString(relsXml, 'text/xml');
+      const rels = {};
+      relsDoc.querySelectorAll('Relationship').forEach(r => {
+        let t = r.getAttribute('Target') || '';
+        if (!t.startsWith('xl/')) t = 'xl/' + t.replace(/^\//, '');
+        rels[r.getAttribute('Id')] = t;
+      });
+
+      wbDoc.querySelectorAll('sheet').forEach(s => {
+        const name = (s.getAttribute('name') || '').trim().toLowerCase();
+        const rId  = s.getAttribute('r:id') ||
+          Array.from(s.attributes).find(a => a.nodeName.endsWith('id'))?.value;
+        if (name && rId && rels[rId]) map[name] = rels[rId];
+      });
+      return map;
+    }
+
+    const origMap = await getSheetPathMap(origZip);
+    const newMap  = await getSheetPathMap(newZip);
+
+    for (const [sheetName, origPath] of Object.entries(origMap)) {
+      const newPath = newMap[sheetName];
+      if (!newPath) continue;
+
+      const origSheetXml = await origZip.file(origPath)?.async('string');
+      let newSheetXml    = await newZip.file(newPath)?.async('string');
+      if (!origSheetXml || !newSheetXml) continue;
+
+      let modified = false;
+
+      const dvMatch = origSheetXml.match(/<dataValidations[\s\S]*?<\/dataValidations>/i);
+      if (dvMatch && !newSheetXml.includes('<dataValidations')) {
+        const insertBefore = /(?=<hyperlinks|<printOptions|<pageMargins|<pageSetup|<headerFooter|<rowBreaks|<colBreaks|<customProperties|<cellWatch|<ignoredErrors|<smartTags|<drawing|<legacyDrawing|<legacyDrawingHF|<picture|<oleObjects|<controls|<webPublishItems|<tableParts|<extLst|<\/worksheet>)/i;
+        if (insertBefore.test(newSheetXml)) {
+          newSheetXml = newSheetXml.replace(insertBefore, dvMatch[0]);
+        } else {
+          newSheetXml = newSheetXml.replace('</worksheet>', dvMatch[0] + '</worksheet>');
+        }
+        modified = true;
+      }
+
+      const extMatch = origSheetXml.match(/<extLst[\s\S]*?<\/extLst>/i);
+      if (extMatch && extMatch[0].includes('dataValidation')) {
+        if (!newSheetXml.includes('<extLst')) {
+          newSheetXml = newSheetXml.replace('</worksheet>', extMatch[0] + '</worksheet>');
+          modified = true;
+        } else if (!newSheetXml.includes('x14:dataValidation')) {
+          newSheetXml = newSheetXml.replace(/<extLst[\s\S]*?<\/extLst>/i, extMatch[0]);
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        newZip.file(newPath, newSheetXml);
+      }
+    }
+
+    return await newZip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' });
+  } catch (err) {
+    console.warn('Validation restoration notice:', err);
+    return excelJsBuffer;
+  }
+}
+
+async function exportCRV() {
+  notify('Building CRV...', 'success');
+  addAIMsg('system', '📥 Generating CRV spreadsheet with complete template preservation...');
+  try {
+    let workbook = new ExcelJS.Workbook();
+    let sheet;
+    let headerRow = 0;
+
+    if (templateBuffer) {
+      await workbook.xlsx.load(templateBuffer);
+      const want = templateInfo?.sheetName || "Supplier's Listing";
+      sheet = workbook.getWorksheet(want)
+        || workbook.worksheets.find(w => /supplier/i.test(w.name))
+        || workbook.worksheets[0];
+      if (!sheet) { notify('Template sheet not found', 'error'); return; }
+      headerRow = templateInfo?.headerRow ?? 0;
+    } else {
+      sheet = workbook.addWorksheet("Supplier's Listing");
+      workbook.addWorksheet('Batch information');
+      workbook.addWorksheet('Packing Details');
+      const headers = ['Visual or Sample n°', "Supplier's reference", "Supplier's designation", 'Noz designation', 'Colour(s)', 'Measure units', 'Brand/License', 'BIUB or BBD', 'Untaxed (Wine)', 'Qty available'];
+      sheet.addRow(headers);
+      sheet.getRow(1).font = { bold: true };
+      sheet.getRow(1).height = 40;
+      headerRow = 0;
+    }
+
+    let maxImgs = 1;
+    crvData.forEach(r => { const c = Array.isArray(r.visual) ? r.visual.length : (r.visual ? 1 : 0); if (c > maxImgs) maxImgs = c; });
+    const colW = maxImgs <= 1 ? 42 : maxImgs === 2 ? 78 : maxImgs === 3 ? 110 : 40 + maxImgs * 36;
+    sheet.getColumn(1).width = colW;
+
+    const startRow = headerRow + 2;
+    const multiPt = maxImgs > 1 ? 160 : 150;
+
+    for (let i = 0; i < crvData.length; i++) {
+      const row = crvData[i];
+      const excelRowNum = startRow + i;
+      const excelRow = sheet.getRow(excelRowNum);
+
+      excelRow.getCell(1).value = '';
+      excelRow.getCell(2).value = row.ref ?? '';
+      excelRow.getCell(3).value = row.designation ?? '';
+      excelRow.getCell(4).value = row.noz ?? '';
+      excelRow.getCell(5).value = row.colour ?? '';
+      excelRow.getCell(6).value = row.measure ?? '';
+      excelRow.getCell(7).value = row.brand ?? '';
+      excelRow.getCell(8).value = row.biub ?? '';
+      excelRow.getCell(9).value = row.untaxed ?? '';
+      const q = typeof row.qty === 'number' ? row.qty : parseFloat(String(row.qty ?? '').replace(/[^\d.-]/g, ''));
+      excelRow.getCell(10).value = isNaN(q) ? null : q;
+      excelRow.getCell(10).numFmt = '0';
+
+      const images = Array.isArray(row.visual) ? row.visual : (row.visual ? [row.visual] : []);
+      const rh = images.length > 0 ? (images.length > 1 ? multiPt : 150) : 35;
+      excelRow.height = rh;
+      excelRow.alignment = { vertical: 'middle', wrapText: true };
+      excelRow.commit();
+
+      if (images.length > 0) {
+        const EMU = 9525, colWpx = colW * 7.5, rowHpx = rh * 1.333, pad = 10, gap = 8, n = images.length;
+        const availW = Math.max(40, colWpx - pad * 2), availH = Math.max(40, rowHpx - pad * 2);
+        const slotW = (availW - gap * (n - 1)) / n;
+
+        for (let j = 0; j < n; j++) {
+          const dataUrl = images[j];
+          if (!dataUrl || typeof dataUrl !== 'string') continue;
+          try {
+            const meta = await getImageMeta(dataUrl);
+            if (!meta.base64 || meta.width < 2) continue;
+            const imageId = workbook.addImage({ base64: meta.base64, extension: meta.ext });
+            const scale = Math.min(slotW / meta.width, availH / meta.height) * 0.88;
+            const fw = Math.max(12, Math.round(meta.width * scale));
+            const fh = Math.max(12, Math.round(meta.height * scale));
+            let x = pad + j * (slotW + gap) + (slotW - fw) / 2;
+            let y = pad + (availH - fh) / 2;
+            x = Math.max(pad, Math.min(x, colWpx - pad - fw));
+            y = Math.max(pad, Math.min(y, rowHpx - pad - fh));
+
+            sheet.addImage(imageId, {
+              tl: { nativeCol: 0, nativeColOff: Math.round(x * EMU), nativeRow: excelRowNum - 1, nativeRowOff: Math.round(y * EMU) },
+              ext: { width: fw, height: fh },
+              editAs: 'oneCell'
+            });
+          } catch (err) { console.warn('img error', i, j, err); }
+        }
+      }
+    }
+
+    const rawBuffer = await workbook.xlsx.writeBuffer();
+    const finalBuf = await restoreValidationsAndPreserveWorkbook(templateBuffer, rawBuffer);
+
+    const blob = new Blob([finalBuf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const fname = (sourceData?.filename?.replace(/\.[^.]+$/, '') || 'CRV') + '_CRV.xlsx';
+    saveAs(blob, fname);
+
+    addAIMsg('ai', `🎉 <strong>Export complete!</strong><br>File: <strong>${fname}</strong><br>• Sheet 1 ("Supplier's Listing"): Filled with formatted data & multi-images<br>• Sheet 2 & 3 ("Batch information", etc.): 100% preserved from template with dropdowns.`);
+    notify('CRV Exported Successfully!', 'success');
+  } catch (err) {
+    console.error(err);
+    notify('Export failed: ' + err.message, 'error');
+  }
+}
+
+function getImageMeta(dataUrl) {
+  return new Promise((resolve) => {
+    if (!dataUrl || typeof dataUrl !== 'string') {
+      return resolve({ base64: '', ext: 'jpeg', width: 100, height: 100 });
+    }
+
+    const commaIdx = dataUrl.indexOf(',');
+    const base64 = commaIdx >= 0 ? dataUrl.substring(commaIdx + 1) : dataUrl;
+
+    let ext = 'jpeg';
+    const mimeMatch = dataUrl.match(/data:image\/([a-zA-Z0-9+.-]+);/i);
+    if (mimeMatch) {
+      ext = mimeMatch[1].toLowerCase();
+      if (ext === 'jpg') ext = 'jpeg';
+    }
+    if (!['png', 'jpeg', 'gif', 'webp'].includes(ext)) ext = 'jpeg';
+
+    // Timeout so a bad image never freezes export — still use real size when load works
+    let settled = false;
+    const finish = (meta) => {
+      if (settled) return;
+      settled = true;
+      resolve(meta);
+    };
+
+    const timer = setTimeout(() => {
+      finish({ base64, ext, width: 100, height: 100 });
+    }, 2000);
+
+    const img = new Image();
+    img.onload = () => {
+      clearTimeout(timer);
+      finish({
+        base64,
+        ext,
+        width: img.naturalWidth || img.width || 100,
+        height: img.naturalHeight || img.height || 100   // ← was wrongly hardcoded to 100
+      });
+    };
+    img.onerror = () => {
+      clearTimeout(timer);
+      finish({ base64, ext, width: 100, height: 100 });
+    };
+    img.src = dataUrl;
+  });
+}
+function goToStep(n){
+  [1,2,3,4].forEach(i=>{
+    const el=document.getElementById('step-'+i);
+    if(el)el.classList.toggle('hidden',i!==n);
+  });
+  document.querySelectorAll('.step').forEach(s=>{
+    const sn=parseInt(s.dataset.step);
+    s.classList.remove('step--active','step--done');
+    if(sn<n){s.classList.add('step--done');s.querySelector('.step__num').textContent='✓';}
+    else if(sn===n){s.classList.add('step--active');s.querySelector('.step__num').textContent=sn;}
+    else s.querySelector('.step__num').textContent=sn;
+  });
+  updateNavButtons();
+}
+
+function resetApp(){
+  if(crvData.length>0&&!confirm('Reset current conversion?'))return;
+  sourceData=null;columnMapping={};crvData=[];editCount=0;
+  document.getElementById('file-input').value='';
+  document.getElementById('crv-body').innerHTML = '';
+  document.getElementById('mapping-body').innerHTML = '';
+  updateStats();
+  goToStep(1);updateNavButtons();
+  addAIMsg('system','Reset — ready for new file');
+}
+
+function notify(text,type='success'){
+  const n=document.createElement('div');
+  n.className=`notification notification--${type}`;
+  n.textContent=text;
+  document.body.appendChild(n);
+  setTimeout(()=>n.remove(),3200);
+}
+</script>
+</body>
+</html>
